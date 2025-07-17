@@ -255,23 +255,98 @@
     <div id="sum">Σύνολο: 0</div>
   </main>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
   <script>
-    const inputs = document.querySelectorAll('input[type="number"]');
+    // Firebase-Konfiguration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAni0T5TFTjuZjFEFC_sh8cxgsme5iMiDM",
+      authDomain: "crete-f2354.firebaseapp.com",
+      projectId: "crete-f2354",
+      storageBucket: "crete-f2354.firebasestorage.app",
+      messagingSenderId: "709466530046",
+      appId: "1:709466530046:web:8e0e921b11b8d7617485af"
+    };
+
+    // Firebase initialisieren
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Referenz zum Dokument, in dem die Werte gespeichert werden
+    const docRef = db.collection('synelipsi2026').doc('zahlen');
+
+    const inputs = {
+      zahl1: document.getElementById('zahl1'),
+      zahl2: document.getElementById('zahl2'),
+      zahl3: document.getElementById('zahl3'),
+      zahl4: document.getElementById('zahl4'),
+      zahl5: document.getElementById('zahl5'),
+    };
+
     const sumDisplay = document.getElementById('sum');
 
+    // Hilfsfunktion zur Aktualisierung der Summe
     function updateSum() {
       let total = 0;
-      inputs.forEach(input => {
-        const val = parseInt(input.value, 10);
+      for (const key in inputs) {
+        const val = parseInt(inputs[key].value, 10);
         if (!isNaN(val) && val > 0) {
           total += val;
         }
-      });
+      }
       sumDisplay.textContent = 'Σύνολο: ' + total;
     }
 
-    inputs.forEach(input => {
-      input.addEventListener('input', updateSum);
+    // Um "Echo-Effekte" zu vermeiden, wenn die Werte aus Firebase kommen, eine Variable:
+    let isUpdatingFromFirebase = false;
+
+    // Bei Eingabe wird Firebase aktualisiert
+    Object.values(inputs).forEach(input => {
+      input.addEventListener('input', () => {
+        if (isUpdatingFromFirebase) return; // Ignoriere Eingaben aus Firebase-Updates
+
+        // Werte sammeln
+        const data = {};
+        for (const key in inputs) {
+          let val = parseInt(inputs[key].value, 10);
+          if (isNaN(val) || val < 0) val = 0;
+          data[key] = val;
+        }
+
+        // Firebase updaten (setzt die Daten)
+        docRef.set(data).catch(e => console.error("Firebase write error:", e));
+
+        // Summe lokal aktualisieren
+        updateSum();
+      });
+    });
+
+    // Firestore Listener: Wenn sich Daten ändern, Eingabefelder updaten
+    docRef.onSnapshot((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        isUpdatingFromFirebase = true;
+        for (const key in inputs) {
+          // Nur aktualisieren, wenn Wert anders ist (um unnötiges Setzen zu verhindern)
+          const newValue = data[key] ?? 0;
+          if (inputs[key].value !== newValue.toString()) {
+            inputs[key].value = newValue > 0 ? newValue : '';
+          }
+        }
+        updateSum();
+        isUpdatingFromFirebase = false;
+      } else {
+        // Dokument existiert noch nicht: Leere Werte initialisieren
+        docRef.set({
+          zahl1: 0,
+          zahl2: 0,
+          zahl3: 0,
+          zahl4: 0,
+          zahl5: 0
+        }).catch(e => console.error("Firebase init error:", e));
+      }
     });
   </script>
 </body>

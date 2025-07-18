@@ -1,5 +1,61 @@
 <!DOCTYPE html>
 <html lang="el">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase-Konfiguration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAni0T5TFTjuZjFEFC_sh8cxgsme5iMiDM",
+      authDomain: "crete-f2354.firebaseapp.com",
+      databaseURL: "https://crete-f2354-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "crete-f2354",
+      storageBucket: "crete-f2354.firebasestorage.app",
+      messagingSenderId: "709466530046",
+      appId: "1:709466530046:web:8e0e921b11b8d7617485af"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const inputs = document.querySelectorAll('input[type="number"]');
+    const sumDisplay = document.getElementById('sum');
+
+    function updateSum() {
+      let total = 0;
+      inputs.forEach(input => {
+        const val = parseInt(input.value, 10);
+        if (!isNaN(val)) {
+          total += val;
+        }
+      });
+      sumDisplay.textContent = 'Σύνολο: ' + total;
+    }
+
+    // Empfangen von Firebase
+    inputs.forEach(input => {
+      const id = input.id;
+      const ref = db.ref('values/' + id);
+      ref.on('value', snapshot => {
+        const val = snapshot.val();
+        if (val !== null && input !== document.activeElement) {
+          input.value = val;
+          updateSum();
+        }
+      });
+    });
+
+    // Senden an Firebase
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const val = input.value;
+        db.ref('values/' + input.id).set(val);
+        updateSum();
+      });
+    });
+  </script>
 <head>
   <meta charset="UTF-8" />
   <title>ΣΥΝΕΛΕΥΣΗ ΠΕΡΙΦΕΡΙΑΣ 2026 ΚΡΗΤΗ</title>
@@ -260,60 +316,5 @@
     <div id="sum">Σύνολο: 0</div>
   </main>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <script>
-    // Firebase-Konfiguration
-    const firebaseConfig = {
-      apiKey: "AIzaSyAni0T5TFTjuZjFEFC_sh8cxgsme5iMiDM",
-      authDomain: "crete-f2354.firebaseapp.com",
-      databaseURL: "https://crete-f2354-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "crete-f2354",
-      storageBucket: "crete-f2354.firebasestorage.app",
-      messagingSenderId: "709466530046",
-      appId: "1:709466530046:web:8e0e921b11b8d7617485af"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const inputs = document.querySelectorAll('input[type="number"]');
-    const sumDisplay = document.getElementById('sum');
-
-    function updateSum() {
-      let total = 0;
-      inputs.forEach(input => {
-        const val = parseInt(input.value, 10);
-        if (!isNaN(val)) {
-          total += val;
-        }
-      });
-      sumDisplay.textContent = 'Σύνολο: ' + total;
-    }
-
-    // Empfangen von Firebase
-    inputs.forEach(input => {
-      const id = input.id;
-      const ref = db.ref('values/' + id);
-      ref.on('value', snapshot => {
-        const val = snapshot.val();
-        if (val !== null && input !== document.activeElement) {
-          input.value = val;
-          updateSum();
-        }
-      });
-    });
-
-    // Senden an Firebase
-    inputs.forEach(input => {
-      input.addEventListener('input', () => {
-        const val = input.value;
-        db.ref('values/' + input.id).set(val);
-        updateSum();
-      });
-    });
-  </script>
 </body>
 </html>

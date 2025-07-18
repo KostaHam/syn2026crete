@@ -237,6 +237,11 @@
         <input type="number" id="zahl2" name="zahl2" min="0" />
       </div>
       <div class="person" tabindex="0">
+        <div class="avatar">ΣΑ</div>
+        <label for="zahl2">ΜΑΚΗΣ ΘΕΟΔΩΡΑΤΟΣ</label>
+        <input type="number" id="zahl2" name="zahl2" min="0" />
+      </div>
+      <div class="person" tabindex="0">
         <div class="avatar">ΤΝ</div>
         <label for="zahl3">ΤΑΣΟΣ ΝΙΚΟΛΑΟΥ</label>
         <input type="number" id="zahl3" name="zahl3" min="0" />
@@ -308,27 +313,6 @@
         db.ref('values/' + input.id).set(val);
         updateSum();
       });
-    });
-  </script>
-
-
-  <script>
-    const inputs = document.querySelectorAll('input[type="number"]');
-    const sumDisplay = document.getElementById('sum');
-
-    function updateSum() {
-      let total = 0;
-      inputs.forEach(input => {
-        const val = parseInt(input.value, 10);
-        if (!isNaN(val) && val > 0) {
-          total += val;
-        }
-      });
-      sumDisplay.textContent = 'Σύνολο: ' + total;
-    }
-
-    inputs.forEach(input => {
-      input.addEventListener('input', updateSum);
     });
   </script>
 </body>
